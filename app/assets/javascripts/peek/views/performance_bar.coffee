@@ -107,11 +107,11 @@ class PerformanceBar
   mapH: (offset) ->
     offset * (@width / @total())
 
-renderPerformanceBar = ->
+renderPerformanceBar = (timing) ->
   resp = $('#peek-server_response_time')
   time = Math.round(resp.data('time') * 1000)
 
-  bar = new PerformanceBar
+  bar = new PerformanceBar({timing})
   bar.render time
 
   span = $('<span>', {'class': 'peek-tooltip', title: 'Total navigation time for this page.'})
@@ -161,7 +161,9 @@ $(document).on 'pjax:end page:change', (event, xhr) ->
   , 0
 
 $ ->
-  if window.performance
-    renderPerformanceBar()
-  else
-    $('#peek-view-performance-bar').remove()
+  setTimeout ->
+    if performance = (window.parent?.performance || window.performance)
+      renderPerformanceBar(performance.timing)
+    else
+      $('#peek-view-performance-bar').remove()
+  , 200
